@@ -583,6 +583,10 @@ ros2 topic echo /joint_states
 
 ### Docker Compose (Recomendado)
 
+```bash
+docker exec -it ros-jazzy-container bash -c "cd /ros2_ws && source /opt/ros/jazzy/setup.bash && colcon build && source install/setup.bash && ros2 launch manipulator_launch_pkg manipulator_launch.launch.xml"
+
+
 O projeto já inclui um arquivo `docker-compose.yml` configurado. Esta é a forma mais simples de executar:
 
 #### Execução Rápida (3 passos)
