@@ -17,6 +17,7 @@ services:
       - NVIDIA_DRIVER_CAPABILITIES=all
       - ROS_DOMAIN_ID=0
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - GZ_SIM_RESOURCE_PATH=/ros2_ws/install/manipulator_description_pkg/share
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - .:/ros2_ws
