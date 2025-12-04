@@ -9,11 +9,14 @@ services:
     privileged: true
     stdin_open: true
     tty: true
+    working_dir: /ros2_ws
     environment:
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
+      - ROS_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - .:/ros2_ws
@@ -22,6 +25,7 @@ services:
       - /dev/dri:/dev/dri
     group_add:
       - video
+    # Remova 'deploy' se não tiver GPU NVIDIA ou use 'docker compose --profile gpu up'
     deploy:
       resources:
         reservations:
