@@ -581,55 +581,63 @@ ros2 topic echo /joint_states
 
 ---
 
-### Docker Compose (Alternativa)
+### Docker Compose (Recomendado)
 
-Para facilitar a execução, você pode usar Docker Compose. Crie um arquivo `docker-compose.yml`:
+O projeto já inclui um arquivo `docker-compose.yml` configurado. Esta é a forma mais simples de executar:
 
-```yaml
-version: '3.8'
-
-services:
-  ros2-manipulator:
-    image: jazzy-image
-    container_name: ros-jazzy-container
-    build:
-      context: .
-      dockerfile: Dockerfile
-    network_mode: host
-    privileged: true
-    stdin_open: true
-    tty: true
-    environment:
-      - DISPLAY=${DISPLAY}
-      - QT_X11_NO_MITSHM=1
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=all
-    volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix
-      - .:/ros2_ws
-      - /etc/localtime:/etc/localtime:ro
-    devices:
-      - /dev/dri:/dev/dri
-    group_add:
-      - video
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-```
-
-Executar com Docker Compose:
+#### Execução Rápida (3 passos)
 
 ```bash
-# Build e execução
-docker-compose up --build
+# 1. Configurar permissões X11 (necessário para GUI)
+xhost +local:docker
 
-# Ou apenas execução (se já construiu)
-docker-compose run ros2-manipulator
+# 2. Iniciar container em background
+docker compose up -d
+
+# 3. Compilar e executar o projeto
+docker exec -it ros-jazzy-container bash -c "\
+    cd /ros2_ws && \
+    source /opt/ros/jazzy/setup.bash && \
+    colcon build && \
+    source install/setup.bash && \
+    ros2 launch manipulator_launch_pkg manipulator_launch.launch.xml"
 ```
+
+#### Comandos Docker Compose
+
+```bash
+# Build e iniciar container em background
+docker compose up -d --build
+
+# Ver logs do container
+docker compose logs -f
+
+# Parar container
+docker compose down
+
+# Reiniciar container
+docker compose restart
+```
+
+#### Acessar Terminal do Container
+
+```bash
+# Abrir terminal interativo
+docker exec -it ros-jazzy-container bash
+
+# Dentro do container, carregar ambiente ROS2
+source /opt/ros/jazzy/setup.bash
+source /ros2_ws/install/setup.bash
+```
+
+#### Estrutura do docker-compose.yml
+
+O arquivo `docker-compose.yml` inclui:
+- Suporte a GPU NVIDIA (se disponível)
+- Mapeamento do display X11 para GUI
+- Volume do workspace montado em `/ros2_ws`
+- Variáveis de ambiente ROS2 configuradas
+- Rede em modo host para comunicação ROS2
 
 ---
 
@@ -688,20 +696,31 @@ xeyes
 
 | Comando | Descrição |
 |---------|-----------|
-| `docker build -t jazzy-image .` | Construir imagem |
-| `./run.sh` | Executar container (com detecção de GPU) |
+| `xhost +local:docker` | Permitir GUI do Docker |
+| `docker compose up -d --build` | Build e iniciar container |
+| `docker compose down` | Parar e remover container |
 | `docker exec -it ros-jazzy-container bash` | Abrir terminal no container |
-| `docker stop ros-jazzy-container` | Parar container |
-| `docker rm ros-jazzy-container` | Remover container |
-| `docker images` | Listar imagens |
+| `docker compose logs -f` | Ver logs em tempo real |
 | `docker ps` | Listar containers em execução |
+
+#### Comandos Úteis Dentro do Container
+
+| Comando | Descrição |
+|---------|-----------|
+| `colcon build` | Compilar workspace |
+| `source install/setup.bash` | Carregar ambiente do workspace |
+| `ros2 launch manipulator_launch_pkg manipulator_launch.launch.xml` | Executar simulação completa |
+| `ros2 topic list` | Listar tópicos ativos |
+| `ros2 topic echo /joint_states` | Monitorar estados das juntas |
+| `ros2 control list_controllers` | Listar controladores |
 
 O container inclui:
 - ROS2 Jazzy completo
-- Gazebo e ferramentas de simulação
+- Gazebo (Harmonic) e ferramentas de simulação
 - RViz2 e rqt
 - Suporte a GPU NVIDIA (se disponível)
-- PyQt5 para interface gráfica
+- PyQt5 para interface gráfica (HMI)
+- KDL para cinemática inversa
 - Todas as dependências do projeto pré-instaladas
 
 ## Contribuição
