@@ -457,8 +457,8 @@
     
   <ros2_control name="GazeboSimSystem" type="system">
   		<hardware>
-  			<!--plugin>gz_ros2_control/GazeboSimSystem</plugin-->
-  			<plugin>mock_components/GenericSystem</plugin>
+  			<plugin>gz_ros2_control/GazeboSimSystem</plugin>
+  			<!--plugin>mock_components/GenericSystem</plugin-->
         <!--plugin>gz_ros2_control/GazeboSimSystemInterface</plugin-->
   		</hardware>
   		<joint name="J1">
@@ -505,6 +505,11 @@
   		</joint>
   </ros2_control>
 
-	<!-- Nota: O plugin gz_ros2_control já é carregado via launch file com o controller_manager separado -->
-	<!-- Não é necessário especificar parameters aqui quando se usa ros2_control_node separadamente -->
+	<gazebo>
+		<plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+			<!--parameters>/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_controllers_pkg/controllers/controllers.yaml</parameters-->
+			<parameters>/ros2_ws/src/manipulator_controllers_pkg/controllers/controllers.yaml</parameters>
+			<controller_manager_prefix_node_name>controller_manager</controller_manager_prefix_node_name>
+		</plugin>
+	</gazebo>
 </robot>
