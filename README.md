@@ -83,7 +83,7 @@ Este projeto implementa um sistema modular de controle para um manipulador robó
 
 ### Dependências Principais
 - **ROS2 Jazzy Jalisco**
-- **Gazebo (Ignition Gazebo)**
+- **Gazebo (Harmonic Gazebo)**
 - **Python 3.10+**
 - **PyQt5**
 
@@ -158,12 +158,6 @@ colcon build
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
 
-### Compilação de Pacote Específico
-
-```bash
-colcon build --packages-select dynamic_controller_plugin
-```
-
 ### Após a Compilação
 
 ```bash
@@ -182,39 +176,7 @@ source install/setup.bash
 Inicia simulação Gazebo + Controlador de Torque Computado + Cinemática Inversa + HMI:
 
 ```bash
-ros2 launch manipulator_launch_pkg effort_manipulator_launch.launch.py
-```
-
-### 2. Simulação com Controladores Padrão
-
-Simulação com controladores de posição e velocidade:
-
-```bash
-ros2 launch manipulator_launch_pkg manipulator.launch.py
-```
-
-### 3. Apenas Controladores (Gazebo Mínimo)
-
-Setup mínimo para testes:
-
-```bash
-ros2 launch manipulator_launch_pkg gazebo_controllers_launch.launch.py
-```
-
-### 4. Apenas Descrição do Robô (RViz)
-
-Para visualização sem simulação física:
-
-```bash
-ros2 launch manipulator_launch_pkg description.launch.py
-```
-
-### 5. Executar HMI Separadamente
-
-Em um terminal separado (após iniciar a simulação):
-
-```bash
-ros2 run hmi_pkg hmi
+ros2 launch manipulator_launch_pkg manipulator_launch.launch.xml
 ```
 
 ### Verificação do Sistema
@@ -436,28 +398,311 @@ manipulator_ws/
 
 ## Docker
 
-### Construir Imagem
+O projeto inclui suporte completo a Docker para facilitar a execução em qualquer ambiente sem necessidade de instalação manual das dependências.
+
+### Pré-requisitos Docker
+
+#### 1. Instalar Docker
 
 ```bash
-# Criar arquivo TOKEN.txt com credenciais Git (se necessário)
-echo "seu_token_github" > TOKEN.txt
+# Instalar Docker
+sudo apt update
+sudo apt install -y docker.io
 
-# Construir imagem
-bash build.sh
+# Adicionar usuário ao grupo docker (evita uso de sudo)
+sudo usermod -aG docker $USER
+
+# Reiniciar sessão ou executar:
+newgrp docker
 ```
+
+#### 2. Instalar NVIDIA Container Toolkit (Opcional - para GPU)
+
+Se você possui uma GPU NVIDIA e deseja usar aceleração gráfica:
+
+```bash
+# Adicionar repositório NVIDIA
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+
+# Instalar nvidia-container-toolkit
+sudo apt update
+sudo apt install -y nvidia-container-toolkit
+
+# Reiniciar Docker
+sudo systemctl restart docker
+```
+
+#### 3. Configurar Permissões X11 (para GUI)
+
+```bash
+# Permitir conexões X11 do Docker
+xhost +local:docker
+```
+
+> **Dica**: Adicione ao seu `~/.bashrc` para executar automaticamente:
+> ```bash
+> echo "xhost +local:docker > /dev/null 2>&1" >> ~/.bashrc
+> ```
+
+---
+
+### Construir Imagem Docker
+
+#### Método 1: Build Simples (Recomendado)
+
+```bash
+cd ~/ros2_ws/manipulator_ws
+
+# Construir imagem diretamente
+docker build -t jazzy-image .
+```
+
+#### Método 2: Usando Script (com token GitHub privado)
+
+Se o repositório for privado ou precisar de autenticação:
+
+```bash
+cd ~/ros2_ws/manipulator_ws
+
+# Criar arquivo com token do GitHub
+echo "seu_token_github_aqui" > TOKEN.txt
+
+# Executar script de build
+chmod +x build.sh
+./build.sh
+```
+
+---
 
 ### Executar Container
 
+#### Método 1: Usando Script run.sh (Recomendado)
+
+O script `run.sh` detecta automaticamente se há GPU NVIDIA disponível:
+
 ```bash
-# Executa com detecção automática de GPU NVIDIA
-bash run.sh
+cd ~/ros2_ws/manipulator_ws
+
+# Configurar o diretório do workspace local
+# Por padrão usa $HOME/ros2_workspace, edite run.sh se necessário
+
+# Tornar executável e rodar
+chmod +x run.sh
+./run.sh
 ```
+
+#### Método 2: Comando Docker Manual
+
+**Com GPU NVIDIA:**
+```bash
+docker run -it --rm \
+    --name ros-jazzy-container \
+    --network host \
+    --privileged \
+    --gpus all \
+    -e DISPLAY=$DISPLAY \
+    -e NVIDIA_VISIBLE_DEVICES=all \
+    -e NVIDIA_DRIVER_CAPABILITIES=all \
+    -e QT_X11_NO_MITSHM=1 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v $(pwd):/ros2_ws \
+    -v /etc/localtime:/etc/localtime:ro \
+    --device /dev/dri \
+    --group-add video \
+    jazzy-image
+```
+
+**Sem GPU (apenas CPU):**
+```bash
+docker run -it --rm \
+    --name ros-jazzy-container \
+    --network host \
+    --privileged \
+    -e DISPLAY=$DISPLAY \
+    -e QT_X11_NO_MITSHM=1 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v $(pwd):/ros2_ws \
+    -v /etc/localtime:/etc/localtime:ro \
+    --device /dev/dri \
+    --group-add video \
+    jazzy-image
+```
+
+---
+
+### Executar o Projeto Dentro do Container
+
+Uma vez dentro do container, execute os seguintes comandos:
+
+#### 1. Compilar o Workspace
+
+```bash
+# Já está em /ros2_ws
+cd /ros2_ws
+
+# Compilar todos os pacotes
+colcon build
+
+# Ou compilar com otimizações
+colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+# Carregar o ambiente
+source install/setup.bash
+```
+
+#### 2. Executar a Simulação
+
+```bash
+# Lançar sistema completo (Gazebo + Controladores + HMI)
+ros2 launch manipulator_launch_pkg manipulator_launch.launch.xml
+```
+
+#### 3. Executar Componentes Individuais (Opcional)
+
+Em terminais separados dentro do container (use `docker exec`):
+
+```bash
+# Abrir novo terminal no container
+docker exec -it ros-jazzy-container bash
+
+# Dentro do novo terminal, carregar ambiente
+source /opt/ros/jazzy/setup.bash
+source /ros2_ws/install/setup.bash
+
+# Executar HMI separadamente
+ros2 run hmi_pkg hmi
+
+# Ou monitorar tópicos
+ros2 topic list
+ros2 topic echo /joint_states
+```
+
+---
+
+### Docker Compose (Alternativa)
+
+Para facilitar a execução, você pode usar Docker Compose. Crie um arquivo `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  ros2-manipulator:
+    image: jazzy-image
+    container_name: ros-jazzy-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    network_mode: host
+    privileged: true
+    stdin_open: true
+    tty: true
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - .:/ros2_ws
+      - /etc/localtime:/etc/localtime:ro
+    devices:
+      - /dev/dri:/dev/dri
+    group_add:
+      - video
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+```
+
+Executar com Docker Compose:
+
+```bash
+# Build e execução
+docker-compose up --build
+
+# Ou apenas execução (se já construiu)
+docker-compose run ros2-manipulator
+```
+
+---
+
+### Troubleshooting Docker
+
+#### Problema: "cannot open display"
+
+```bash
+# Executar no host antes de iniciar o container
+xhost +local:docker
+```
+
+#### Problema: "permission denied" no Docker
+
+```bash
+# Adicionar usuário ao grupo docker
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+#### Problema: Gazebo não abre / tela preta
+
+```bash
+# Verificar se GPU está disponível no container
+docker exec -it ros-jazzy-container nvidia-smi
+
+# Se não funcionar, verificar instalação do nvidia-container-toolkit
+sudo apt install -y nvidia-container-toolkit
+sudo systemctl restart docker
+```
+
+#### Problema: "Could not find a package configuration file" ao compilar
+
+```bash
+# Dentro do container, garantir que ROS está configurado
+source /opt/ros/jazzy/setup.bash
+rosdep install --from-paths src --ignore-src -r -y
+colcon build
+```
+
+#### Problema: QT/GUI não funciona
+
+```bash
+# Verificar variáveis de ambiente
+echo $DISPLAY
+echo $QT_X11_NO_MITSHM
+
+# Testar GUI simples
+apt install x11-apps
+xeyes
+```
+
+---
+
+### Resumo de Comandos Docker
+
+| Comando | Descrição |
+|---------|-----------|
+| `docker build -t jazzy-image .` | Construir imagem |
+| `./run.sh` | Executar container (com detecção de GPU) |
+| `docker exec -it ros-jazzy-container bash` | Abrir terminal no container |
+| `docker stop ros-jazzy-container` | Parar container |
+| `docker rm ros-jazzy-container` | Remover container |
+| `docker images` | Listar imagens |
+| `docker ps` | Listar containers em execução |
 
 O container inclui:
 - ROS2 Jazzy completo
 - Gazebo e ferramentas de simulação
 - RViz2 e rqt
 - Suporte a GPU NVIDIA (se disponível)
+- PyQt5 para interface gráfica
+- Todas as dependências do projeto pré-instaladas
 
 ## Contribuição
 
