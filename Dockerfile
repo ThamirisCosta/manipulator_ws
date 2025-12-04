@@ -101,6 +101,8 @@ ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=graphics,utility,compute
 ENV QT_X11_NO_MITSHM=1
 
+RUN export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/ros/jazzy/lib/gz_ros2_control
+
 # Configurar o workspace do ROS 2
 RUN mkdir -p /ros2_ws/src
 WORKDIR /ros2_ws
