@@ -1,0 +1,16 @@
+<launch>
+	<!--Launch da descrição, gazebo e controladores do robô-->
+	<include file="$(find-pkg-share manipulator_launch_pkg)/launch/description.launch.py"/>
+	<include file="$(find-pkg-share manipulator_launch_pkg)/launch/gazebo_controllers_launch.launch.py"/>
+	<!--include file="$(find-pkg-share manipulator_launch_pkg)/launch/manipulator.launch.py"/-->
+
+	<!-- RViz -->
+	<arg name="rviz_config_file" default="$(find-pkg-share manipulator_description_pkg)/config/manipulator_description.rviz"/>
+	<node pkg="rviz2" exec="rviz2" name="rviz2" output="screen" args="-d $(var rviz_config_file)"/>
+
+	<!-- Launch da IHM -->
+	<node pkg="hmi_pkg" exec="hmi" name="hmi" output="screen"/>
+
+	<!-- Nó da cinemática -->
+    <node pkg="kinematics_kdl" exec="main" name="main" output="screen"/>
+</launch>
