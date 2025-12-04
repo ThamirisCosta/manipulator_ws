@@ -22,7 +22,7 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <mesh filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/base_link.stl" />
+        <mesh filename="package://manipulator_description_pkg/meshes/base_link.stl" />
       </geometry>
       <material
         name="">
@@ -35,7 +35,7 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <mesh filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/base_link.stl" />
+        <mesh filename="package://manipulator_description_pkg/meshes/base_link.stl" />
       </geometry>
     </collision>
   </link>
@@ -70,7 +70,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/Link_1.stl" />
+          filename="package://manipulator_description_pkg/meshes/Link_1.stl" />
       </geometry>
       <material
         name="">
@@ -84,7 +84,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/Link_1.stl" />
+          filename="package://manipulator_description_pkg/meshes/Link_1.stl" />
       </geometry>
     </collision>
   </link>
@@ -128,7 +128,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/Link_2.stl" />
+          filename="package://manipulator_description_pkg/meshes/Link_2.stl" />
       </geometry>
       <material
         name="">
@@ -142,7 +142,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/Link_2.stl" />
+          filename="package://manipulator_description_pkg/meshes/Link_2.stl" />
       </geometry>
     </collision>
   </link>
@@ -186,7 +186,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/Link_3.stl" />
+          filename="package://manipulator_description_pkg/meshes/Link_3.stl" />
       </geometry>
       <material
         name="">
@@ -200,7 +200,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/Link_3.stl" />
+          filename="package://manipulator_description_pkg/meshes/Link_3.stl" />
       </geometry>
     </collision>
   </link>
@@ -244,7 +244,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/Link_4.stl" />
+          filename="package://manipulator_description_pkg/meshes/Link_4.stl" />
       </geometry>
       <material
         name="">
@@ -258,7 +258,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/Link_4.stl" />
+          filename="package://manipulator_description_pkg/meshes/Link_4.stl" />
       </geometry>
     </collision>
   </link>
@@ -302,7 +302,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/Link_5.stl" />
+          filename="package://manipulator_description_pkg/meshes/Link_5.stl" />
       </geometry>
       <material
         name="">
@@ -316,7 +316,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/Link_5.stl" />
+          filename="package://manipulator_description_pkg/meshes/Link_5.stl" />
       </geometry>
     </collision>
   </link>
@@ -360,7 +360,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/Link_6.stl" />
+          filename="package://manipulator_description_pkg/meshes/Link_6.stl" />
       </geometry>
       <material
         name="">
@@ -374,7 +374,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/Link_6.stl" />
+          filename="package://manipulator_description_pkg/meshes/Link_6.stl" />
       </geometry>
     </collision>
   </link>
@@ -418,7 +418,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/Link_7.stl" />
+          filename="package://manipulator_description_pkg/meshes/Link_7.stl" />
       </geometry>
       <material
         name="">
@@ -432,7 +432,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_description_pkg/meshes/Link_7.stl" />
+          filename="package://manipulator_description_pkg/meshes/Link_7.stl" />
       </geometry>
     </collision>
   </link>
@@ -505,11 +505,6 @@
   		</joint>
   </ros2_control>
 
-	<gazebo>
-		<plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
-			<!--parameters>/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_controllers_pkg/controllers/controllers.yaml</parameters-->
-			<parameters>/home/thamiris/Desktop/ISI/ROS_Simulations/manipulator_ws/src/manipulator_controllers_pkg/controllers/controllers.yaml</parameters>
-			<controller_manager_prefix_node_name>controller_manager</controller_manager_prefix_node_name>
-		</plugin>
-	</gazebo>
+	<!-- Nota: O plugin gz_ros2_control já é carregado via launch file com o controller_manager separado -->
+	<!-- Não é necessário especificar parameters aqui quando se usa ros2_control_node separadamente -->
 </robot>
