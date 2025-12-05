@@ -70,11 +70,6 @@ def generate_launch_description():
         output='screen'
     )
 
-    load_position_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'position_controller'],
-        output='screen'
-    )
-
     load_velocity_controller = ExecuteProcess(
         cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'velocity_controller'],
         output='screen'
@@ -91,7 +86,7 @@ def generate_launch_description():
     joint_state_controller_handler = RegisterEventHandler(
         event_handler=OnProcessExit(
             target_action=load_joint_state_controller,
-            on_exit=[load_position_controller, load_velocity_controller]
+            on_exit=[load_velocity_controller]
         )
     )
     
