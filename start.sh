@@ -55,8 +55,11 @@ build_project() {
 
 # Função para executar a simulação
 run_simulation() {
+    print_status "Compilando projeto ROS2 dentro do container..."
+    docker exec ros-jazzy-container bash -c "cd /ros2_ws && source /opt/ros/jazzy/setup.bash && colcon build"
+    
     print_status "Iniciando simulação..."
-    docker exec ros-jazzy-container bash -c "cd /ros2_ws && source /opt/ros/jazzy/setup.bash && source install/setup.bash && ros2 launch manipulator_launch_pkg manipulator_launch.launch.xml"
+    docker exec ros-jazzy-container bash -c "cd /ros2_ws && source /opt/ros/jazzy/setup.bash && source install/setup.bash && ros2 launch manipulator_launch_pkg manipulator_launch.launch.xml start_controller_manager:=false"
 }
 
 # Função para parar o container

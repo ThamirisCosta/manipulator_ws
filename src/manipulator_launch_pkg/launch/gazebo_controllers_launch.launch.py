@@ -1,8 +1,9 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription, RegisterEventHandler, SetEnvironmentVariable
-from launch.event_handlers import OnProcessExit
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription, RegisterEventHandler, SetEnvironmentVariable, TimerAction
+from launch.event_handlers import OnProcessExit, OnProcessStart
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.conditions import IfCondition
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 import os
@@ -75,23 +76,48 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Event handlers para sequência de inicialização
+    # Delay para garantir que o Gazebo carregou o plugin e o controller_manager está pronto
+    # (mesmo quando gerenciado pelo Gazebo, leva alguns segundos)
+    delayed_load_joint_state = TimerAction(
+        period=5.0,
+        actions=[load_joint_state_controller],
+    )
+
+    delayed_load_velocity = TimerAction(
+        period=7.0,
+        actions=[load_velocity_controller],
+    )
+
+    # 1) quando a entidade for spawnada no Gazebo, iniciaremos o controller_manager (se desejado)
     spawn_entity_handler = RegisterEventHandler(
         event_handler=OnProcessExit(
             target_action=gz_spawn_entity,
-            on_exit=[load_joint_state_controller],
-        )
+            on_exit=[controller_manager],
+        ),
+        condition=IfCondition(LaunchConfiguration('start_controller_manager'))
     )
-    
+
+    # 2) quando o controller_manager iniciar, carregamos o joint_state_broadcaster
+    controller_manager_start_handler = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=controller_manager,
+            on_start=[load_joint_state_controller],
+        ),
+        condition=IfCondition(LaunchConfiguration('start_controller_manager'))
+    )
+
+    # 3) após o carregamento do joint_state_broadcaster, ativamos o velocity_controller
     joint_state_controller_handler = RegisterEventHandler(
         event_handler=OnProcessExit(
             target_action=load_joint_state_controller,
             on_exit=[load_velocity_controller]
-        )
+        ),
+        condition=IfCondition(LaunchConfiguration('start_controller_manager'))
     )
     
     return LaunchDescription([
         DeclareLaunchArgument('use_sim_time', default_value='true'),
+        DeclareLaunchArgument('start_controller_manager', default_value='true'),
         
         # Simulação Gazebo
         IncludeLaunchDescription(
@@ -101,13 +127,17 @@ def generate_launch_description():
             launch_arguments=[('gz_args', [' -r -v 4 empty.sdf'])],
         ),
         
-        # Gerenciador de controladores
-        controller_manager,
-        
-        # Spawn da entidade no Gazebo
+        # Spawn da entidade no Gazebo (será inicializado primeiro)
         gz_spawn_entity,
         
-        # Handlers para sequência de inicialização
+        # Handlers para sequência de inicialização com controller_manager local
+        # (controller_manager será iniciado APÓS o spawn terminar)
         spawn_entity_handler,
+        controller_manager_start_handler,
         joint_state_controller_handler,
+        
+        # Carregamento automático de controladores quando usando Gazebo controller_manager
+        # (start_controller_manager:=false)
+        delayed_load_joint_state,
+        delayed_load_velocity,
     ])
